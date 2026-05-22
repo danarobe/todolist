@@ -387,7 +387,8 @@ export default function App() {
   const vis = Object.values(tasks).filter(t => {
     if (t.type === "idea") return t.createdBy === user.username;
     if (t.isPrivate) return t.createdBy === user.username;
-    return t.createdBy === user.username || (t.sharedWith || []).includes(user.username);
+    const friendUsernames = user.friends || [];
+    return t.createdBy === user.username || friendUsernames.includes(t.createdBy);
   });
   const todoTasks  = vis.filter(t => t.type === "task" && !t.completed && t.deadline);
   const dontforget = vis.filter(t => t.type === "task" && !t.completed && !t.deadline);
