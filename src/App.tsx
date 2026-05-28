@@ -32,18 +32,29 @@ const CAT_LABEL = { overdue: "⚠ 기한초과", today: "오늘", week: "이번 
 const ss = async (k, v) => { try { await setDoc(doc(db, "appdata", k), { value: JSON.stringify(v) }); } catch(e) { console.error(e); } };
 
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:"Noto Sans KR",sans-serif;background:#0c0c0f;color:#e2e2ea;-webkit-font-smoothing:antialiased}
-input,textarea,button,select{font-family:"Noto Sans KR",sans-serif!important;outline:none}
-::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:#252530;border-radius:2px}
-input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.5);cursor:pointer}
+body{font-family:"Pretendard","Noto Sans KR",sans-serif;background:#111114;color:#d8d8e0;-webkit-font-smoothing:antialiased}
+input,textarea,button,select{font-family:"Pretendard","Noto Sans KR",sans-serif!important;outline:none}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2a2a35;border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:#3a3a48}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(0.4);cursor:pointer}
+.trow{transition:border-color .2s, box-shadow .2s}
+.trow:hover{border-color:#2e2e3e!important;box-shadow:0 2px 12px rgba(0,0,0,.3)}
 .trow:hover .del-btn{opacity:1!important}
 .trow:hover .restore-btn{opacity:1!important}
-.nav-link{transition:all .15s;cursor:pointer}.nav-link:hover{color:#f59e0b!important}
-.pill-btn{transition:all .15s;cursor:pointer}.pill-btn:hover{opacity:.85}
-.task-check{transition:all .2s}.task-check:hover{border-color:#f59e0b!important}
-.fab{transition:transform .15s}.fab:hover{transform:scale(1.05)}
+.nav-link{transition:all .18s;cursor:pointer}
+.nav-link:hover{color:#c8a96e!important;background:#c8a96e08!important}
+.pill-btn{transition:all .18s;cursor:pointer}
+.pill-btn:hover{opacity:.8;transform:translateY(-1px)}
+.task-check{transition:all .2s}
+.task-check:hover{border-color:#c8a96e!important;background:#c8a96e10!important}
+.fab{transition:all .18s;box-shadow:0 2px 8px rgba(200,169,110,.2)}
+.fab:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(200,169,110,.3)}
+.card-base{background:#18181e;border:1px solid #242430;border-radius:14px;transition:all .2s}
+.card-base:hover{border-color:#2e2e3e;box-shadow:0 2px 16px rgba(0,0,0,.25)}
 @media(max-width:680px){.sidebar{display:none!important}.bot-nav{display:flex!important}.mob-header{display:flex!important}}
 @media(min-width:681px){.bot-nav{display:none!important}.mob-header{display:none!important}}
 `;
@@ -77,24 +88,23 @@ function FriendRequests({ requests, users, onAccept, onReject }) {
   );
 }
 
-// ── 할 일 카드 (Fix 4: 날짜 표시) ──
+// ── 할 일 카드 ──
 function TaskCard({ task, onComplete, onDelete, users, currentUser, showDeadline }) {
   const cat = deadlineCat(task.deadline);
   const creator = users[task.createdBy];
   return (
-    <div className="trow" style={{ background: "#16161e", border: "1px solid #222230", borderRadius: 12, padding: "13px 14px", marginBottom: 9, display: "flex", alignItems: "flex-start", gap: 11 }}>
-      <button className="task-check" onClick={() => onComplete(task.id)} style={{ width: 22, height: 22, borderRadius: "50%", border: `2px solid ${cat === "overdue" ? "#ef4444" : "#333345"}`, background: "transparent", cursor: "pointer", flexShrink: 0, marginTop: 2 }} />
+    <div className="trow card-base" style={{ padding: "14px 16px", marginBottom: 8, display: "flex", alignItems: "flex-start", gap: 12 }}>
+      <button className="task-check" onClick={() => onComplete(task.id)} style={{ width: 20, height: 20, borderRadius: 6, border: `1.5px solid ${cat === "overdue" ? "#e05555" : "#3a3a4e"}`, background: "transparent", cursor: "pointer", flexShrink: 0, marginTop: 2 }} />
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "#e2e2ea", lineHeight: 1.55 }}>{task.title}</div>
-        <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 5, alignItems: "center" }}>
-          {showDeadline && cat && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 10, background: `${CAT_COLOR[cat]}18`, color: CAT_COLOR[cat] }}>{CAT_LABEL[cat]} · {fmtDate(task.deadline)}</span>}
-          {task.createdAt && <span style={{ fontSize: 11, color: "#3a3a52" }}>📅 {fmtFull(task.createdAt)}</span>}
-          {task.isPrivate && <span style={{ fontSize: 11, padding: "2px 7px", borderRadius: 10, background: "#8b5cf618", color: "#8b5cf6" }}>🔒 비공개</span>}
-          {creator && task.createdBy !== currentUser && <span style={{ fontSize: 11, color: "#525265" }}>by {creator.displayName}</span>}
-          {(task.sharedWith || []).length > 0 && <span style={{ fontSize: 11, color: "#525265" }}>👥 공유됨</span>}
+        <div style={{ fontSize: 14, fontWeight: 500, color: "#d8d8e0", lineHeight: 1.6, letterSpacing: "-0.01em" }}>{task.title}</div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 7, alignItems: "center" }}>
+          {showDeadline && cat && <span style={{ fontSize: 11, padding: "2px 9px", borderRadius: 6, background: `${CAT_COLOR[cat]}15`, color: CAT_COLOR[cat], fontWeight: 500, letterSpacing: "0.01em" }}>{CAT_LABEL[cat]} · {fmtDate(task.deadline)}</span>}
+          {task.createdAt && <span style={{ fontSize: 11, color: "#7a7a92", fontWeight: 400 }}>등록 {fmtFull(task.createdAt)}</span>}
+          {task.isPrivate && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: "#7c3aed18", color: "#a78bfa" }}>비공개</span>}
+          {creator && task.createdBy !== currentUser && <span style={{ fontSize: 11, color: "#6a6a82", fontWeight: 500 }}>{creator.displayName}</span>}
         </div>
       </div>
-      <button className="del-btn" onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#252530", cursor: "pointer", fontSize: 20, flexShrink: 0, padding: "0 3px", opacity: 0, transition: "opacity .15s" }}>×</button>
+      <button className="del-btn" onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#2e2e3e", cursor: "pointer", fontSize: 18, flexShrink: 0, padding: "0 2px", opacity: 0, transition: "opacity .15s" }}>×</button>
     </div>
   );
 }
@@ -105,34 +115,34 @@ function EverydayCard({ task, onCheck, onDelete, currentUser, users }) {
   const list = task.everydayChecks?.[td] || [];
   const checked = list.includes(currentUser);
   return (
-    <div style={{ background: "#16161e", border: `1px solid ${checked ? "#f59e0b30" : "#222230"}`, borderRadius: 12, padding: "13px 14px", marginBottom: 9, display: "flex", alignItems: "center", gap: 11 }}>
-      <button onClick={() => onCheck(task.id)} style={{ width: 24, height: 24, borderRadius: 7, border: `2px solid ${checked ? "#f59e0b" : "#333345"}`, background: checked ? "#f59e0b" : "transparent", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#0c0c0f", fontWeight: 700, fontSize: 14, transition: "all .2s" }}>{checked && "✓"}</button>
+    <div className="card-base" style={{ border: `1px solid ${checked ? "#c8a96e35" : "#242430"}`, padding: "14px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12 }}>
+      <button onClick={() => onCheck(task.id)} style={{ width: 22, height: 22, borderRadius: 7, border: `1.5px solid ${checked ? "#c8a96e" : "#3a3a4e"}`, background: checked ? "#c8a96e" : "transparent", cursor: "pointer", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", color: "#111114", fontWeight: 700, fontSize: 13, transition: "all .2s" }}>{checked && "✓"}</button>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: checked ? "#525265" : "#e2e2ea", textDecoration: checked ? "line-through" : "none" }}>{task.title}</div>
-        <div style={{ display: "flex", gap: 8, marginTop: 4, flexWrap: "wrap" }}>
-          {task.createdAt && <span style={{ fontSize: 11, color: "#3a3a52" }}>📅 {fmtFull(task.createdAt)}</span>}
-          {list.length > 0 && <span style={{ fontSize: 11, color: "#525265" }}>오늘 체크: {list.map(u => users[u]?.displayName || u).join(", ")}</span>}
+        <div style={{ fontSize: 14, fontWeight: 500, color: checked ? "#5a5a72" : "#d8d8e0", letterSpacing: "-0.01em" }}>{task.title}</div>
+        <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
+          {task.createdAt && <span style={{ fontSize: 11, color: "#7a7a92" }}>등록 {fmtFull(task.createdAt)}</span>}
+          {list.length > 0 && <span style={{ fontSize: 11, color: "#6a6a82" }}>오늘 체크: {list.map(u => users[u]?.displayName || u).join(", ")}</span>}
         </div>
       </div>
-      <button onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#333345", cursor: "pointer", fontSize: 19 }}>×</button>
+      <button onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#2e2e3e", cursor: "pointer", fontSize: 18 }}>×</button>
     </div>
   );
 }
 
-// ── 완료 카드 (Fix 5: 복원 버튼) ──
+// ── 완료 카드 ──
 function CompletedCard({ task, onRestore, onDelete }) {
   return (
-    <div className="trow" style={{ background: "#16161e", border: "1px solid #1a1a26", borderRadius: 12, padding: "11px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 11 }}>
-      <div style={{ width: 22, height: 22, borderRadius: "50%", background: "#f59e0b18", border: "2px solid #f59e0b50", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#f59e0b", flexShrink: 0 }}>✓</div>
+    <div className="trow card-base" style={{ padding: "14px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, opacity: 0.75 }}>
+      <div style={{ width: 20, height: 20, borderRadius: 6, background: "#c8a96e18", border: "1.5px solid #c8a96e50", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#c8a96e", flexShrink: 0, fontWeight: 700 }}>✓</div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, color: "#7a7a92", textDecoration: "line-through" }}>{task.title}</div>
-        <div style={{ fontSize: 11, color: "#3a3a52", marginTop: 2 }}>
-          {task.completedAt && `✅ ${fmtFull(task.completedAt)} 완료`}
-          {task.createdAt && ` · 📅 ${fmtFull(task.createdAt)} 등록`}
+        <div style={{ fontSize: 14, color: "#8a8a9a", fontWeight: 400, letterSpacing: "-0.01em" }}>{task.title}</div>
+        <div style={{ display: "flex", gap: 10, marginTop: 6, flexWrap: "wrap" }}>
+          {task.completedAt && <span style={{ fontSize: 11, color: "#9898aa", fontWeight: 500 }}>완료 {fmtFull(task.completedAt)}</span>}
+          {task.createdAt && <span style={{ fontSize: 11, color: "#7a7a8e" }}>등록 {fmtFull(task.createdAt)}</span>}
         </div>
       </div>
-      <button className="restore-btn" onClick={() => onRestore(task.id)} style={{ background: "transparent", border: "1px solid #333345", borderRadius: 7, color: "#9898b2", cursor: "pointer", fontSize: 11, padding: "4px 10px", marginRight: 4, opacity: 0, transition: "opacity .15s", whiteSpace: "nowrap" }}>↩ 복원</button>
-      <button className="del-btn" onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#252530", cursor: "pointer", fontSize: 20, opacity: 0, transition: "opacity .15s" }}>×</button>
+      <button className="restore-btn" onClick={() => onRestore(task.id)} style={{ background: "transparent", border: "1px solid #2e2e3e", borderRadius: 7, color: "#7a7a92", cursor: "pointer", fontSize: 11, padding: "4px 10px", marginRight: 4, opacity: 0, transition: "opacity .15s", whiteSpace: "nowrap" }}>↩ 복원</button>
+      <button className="del-btn" onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#2e2e3e", cursor: "pointer", fontSize: 18, opacity: 0, transition: "opacity .15s" }}>×</button>
     </div>
   );
 }
@@ -140,13 +150,13 @@ function CompletedCard({ task, onRestore, onDelete }) {
 // ── 아이디어 카드 ──
 function IdeaCard({ task, onDelete }) {
   return (
-    <div style={{ background: "#16161e", border: "1px solid #222230", borderRadius: 12, padding: "14px 16px", marginBottom: 10 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 7 }}>
-        <span style={{ fontSize: 11, color: "#525265" }}>📅 {fmtFull(task.createdAt)}</span>
-        <button onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#333345", cursor: "pointer", fontSize: 18 }}>×</button>
+    <div className="card-base" style={{ padding: "16px 18px", marginBottom: 10 }}>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 10 }}>
+        <span style={{ fontSize: 11, color: "#7a7a92", fontWeight: 500 }}>등록 {fmtFull(task.createdAt)}</span>
+        <button onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#2e2e3e", cursor: "pointer", fontSize: 17 }}>×</button>
       </div>
-      <div style={{ fontSize: 14, color: "#e2e2ea", lineHeight: 1.65 }}>{task.title}</div>
-      {task.memo && <div style={{ fontSize: 13, color: "#7a7a92", marginTop: 8, lineHeight: 1.55, borderTop: "1px solid #222230", paddingTop: 8 }}>{task.memo}</div>}
+      <div style={{ fontSize: 14, color: "#d8d8e0", lineHeight: 1.7, letterSpacing: "-0.01em" }}>{task.title}</div>
+      {task.memo && <div style={{ fontSize: 13, color: "#7a7a92", marginTop: 10, lineHeight: 1.6, borderTop: "1px solid #1e1e28", paddingTop: 10 }}>{task.memo}</div>}
     </div>
   );
 }
@@ -223,24 +233,24 @@ function AddModal({ initType, onAdd, onClose, friends }) {
 // ── 로그인 화면 ──
 function LoginScreen({ mode, setMode, username, setUsername, dispName, setDispName, onLogin, onRegister, err }) {
   return (
-    <div style={{ minHeight: "100vh", background: "#0c0c0f", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
+    <div style={{ minHeight: "100vh", background: "#111114", display: "flex", alignItems: "center", justifyContent: "center", padding: "0 24px" }}>
       <div style={{ width: "100%", maxWidth: 360 }}>
-        <div style={{ textAlign: "center", marginBottom: 36 }}>
-          <div style={{ fontSize: 42, fontWeight: 700, color: "#f59e0b", letterSpacing: -2 }}>FOCUS</div>
-          <div style={{ fontSize: 13, color: "#525265", marginTop: 6 }}>할 일을 절대 까먹지 않는 법</div>
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ fontSize: 36, fontWeight: 700, color: "#c8a96e", letterSpacing: "-2px", marginBottom: 8 }}>FOCUS</div>
+          <div style={{ fontSize: 13, color: "#52526a", letterSpacing: "0.05em" }}>할 일을 절대 까먹지 않는 법</div>
         </div>
-        <div style={{ background: "#16161e", border: "1px solid #222230", borderRadius: 18, padding: 28 }}>
-          <div style={{ display: "flex", background: "#0c0c0f", borderRadius: 10, padding: 3, marginBottom: 22 }}>
-            {[["login", "로그인"], ["register", "회원가입"]].map(([m, l]) => <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", background: mode === m ? "#f59e0b" : "transparent", color: mode === m ? "#0c0c0f" : "#525265", fontWeight: mode === m ? 700 : 400, fontSize: 13, cursor: "pointer" }}>{l}</button>)}
+        <div style={{ background: "#18181e", border: "1px solid #242430", borderRadius: 20, padding: 32 }}>
+          <div style={{ display: "flex", background: "#111114", borderRadius: 12, padding: 4, marginBottom: 24, gap: 4 }}>
+            {[["login", "로그인"], ["register", "회원가입"]].map(([m, l]) => <button key={m} onClick={() => setMode(m)} style={{ flex: 1, padding: "9px", borderRadius: 9, border: "none", background: mode === m ? "#c8a96e" : "transparent", color: mode === m ? "#111114" : "#52526a", fontWeight: mode === m ? 700 : 400, fontSize: 13, cursor: "pointer", transition: "all .18s" }}>{l}</button>)}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            <input value={username} onChange={e => setUsername(e.target.value)} placeholder="아이디 (영문 소문자, 숫자, _)" style={{ background: "#0c0c0f", border: "1px solid #2a2a38", borderRadius: 10, padding: "11px 14px", color: "#e2e2ea", fontSize: 14, width: "100%" }} onKeyDown={e => e.key === "Enter" && (mode === "login" ? onLogin() : onRegister())} />
-            {mode === "register" && <input value={dispName} onChange={e => setDispName(e.target.value)} placeholder="이름" style={{ background: "#0c0c0f", border: "1px solid #2a2a38", borderRadius: 10, padding: "11px 14px", color: "#e2e2ea", fontSize: 14, width: "100%" }} onKeyDown={e => e.key === "Enter" && onRegister()} />}
-            {err && <div style={{ fontSize: 12, color: "#ef4444", padding: "2px 4px" }}>{err}</div>}
-            <button onClick={mode === "login" ? onLogin : onRegister} style={{ background: "#f59e0b", border: "none", borderRadius: 10, padding: "12px", color: "#0c0c0f", fontSize: 14, fontWeight: 700, cursor: "pointer", marginTop: 2 }}>{mode === "login" ? "시작하기" : "계정 만들기"}</button>
+            <input value={username} onChange={e => setUsername(e.target.value)} placeholder="아이디 (영문 소문자, 숫자, _)" style={{ background: "#111114", border: "1px solid #2a2a38", borderRadius: 11, padding: "12px 15px", color: "#d8d8e0", fontSize: 14, width: "100%", transition: "border-color .18s" }} onKeyDown={e => e.key === "Enter" && (mode === "login" ? onLogin() : onRegister())} />
+            {mode === "register" && <input value={dispName} onChange={e => setDispName(e.target.value)} placeholder="이름" style={{ background: "#111114", border: "1px solid #2a2a38", borderRadius: 11, padding: "12px 15px", color: "#d8d8e0", fontSize: 14, width: "100%", transition: "border-color .18s" }} onKeyDown={e => e.key === "Enter" && onRegister()} />}
+            {err && <div style={{ fontSize: 12, color: "#e05555", padding: "2px 4px" }}>{err}</div>}
+            <button onClick={mode === "login" ? onLogin : onRegister} style={{ background: "#c8a96e", border: "none", borderRadius: 11, padding: "13px", color: "#111114", fontSize: 14, fontWeight: 700, cursor: "pointer", marginTop: 4, transition: "all .18s" }}>{mode === "login" ? "시작하기" : "계정 만들기"}</button>
           </div>
         </div>
-        <div style={{ textAlign: "center", marginTop: 18, fontSize: 12, color: "#3a3a52" }}>모든 기기에서 실시간 동기화됩니다 🔥</div>
+        <div style={{ textAlign: "center", marginTop: 20, fontSize: 11, color: "#38384e", letterSpacing: "0.03em" }}>모든 기기에서 실시간 동기화</div>
       </div>
     </div>
   );
@@ -382,7 +392,7 @@ export default function App() {
     await saveT({ ...tasks, [id]: { ...t, everydayChecks: { ...checks, [td]: has ? list.filter(x => x !== user.username) : [...list, user.username] } } });
   };
 
-  if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#0c0c0f", color: "#f59e0b", fontFamily: '"Noto Sans KR",sans-serif', fontSize: 16 }}><style>{CSS}</style>🔥 연결 중...</div>;
+  if (loading) return <div style={{ height: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "#111114", color: "#c8a96e", fontFamily: '"Pretendard","Noto Sans KR",sans-serif', fontSize: 15, letterSpacing: "-0.01em" }}><style>{CSS}</style>연결 중...</div>;
   if (!user) return <><style>{CSS}</style><LoginScreen mode={loginMode} setMode={setLoginMode} username={loginUn} setUsername={setLoginUn} dispName={loginDn} setDispName={setLoginDn} onLogin={doLogin} onRegister={doRegister} err={loginErr} /></>;
 
   const vis = Object.values(tasks).filter(t => {
@@ -427,25 +437,25 @@ export default function App() {
   const openAdd = () => { setAddType({ everyday: "everyday", ideas: "idea" }[tab] || "task"); setShowAdd(true); };
 
   return (
-    <div style={{ fontFamily: '"Noto Sans KR",sans-serif', background: "#0c0c0f", height: "100dvh", color: "#e2e2ea", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+    <div style={{ fontFamily: '"Pretendard","Noto Sans KR",sans-serif', background: "#111114", height: "100dvh", color: "#d8d8e0", display: "flex", flexDirection: "column", overflow: "hidden" }}>
       <style>{CSS}</style>
       <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
         {/* 사이드바 */}
-        <aside className="sidebar" style={{ width: 228, flexShrink: 0, borderRight: "1px solid #1a1a26", display: "flex", flexDirection: "column", overflow: "hidden", background: "#0e0e16" }}>
-          <div style={{ padding: "20px 18px 16px", borderBottom: "1px solid #1a1a26" }}>
-            <div style={{ fontSize: 24, fontWeight: 700, color: "#f59e0b", letterSpacing: -1 }}>FOCUS</div>
-            <div style={{ fontSize: 11, color: "#3a3a52", marginTop: 1 }}>할 일 관리 시스템</div>
+        <aside className="sidebar" style={{ width: 220, flexShrink: 0, borderRight: "1px solid #1e1e28", display: "flex", flexDirection: "column", overflow: "hidden", background: "#0e0e12" }}>
+          <div style={{ padding: "22px 20px 18px", borderBottom: "1px solid #1e1e28" }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: "#c8a96e", letterSpacing: "-1px" }}>FOCUS</div>
+            <div style={{ fontSize: 10, color: "#38384e", marginTop: 2, letterSpacing: "0.04em" }}>TASK MANAGER</div>
           </div>
-          <div style={{ padding: "14px 18px", borderBottom: "1px solid #1a1a26", display: "flex", alignItems: "center", gap: 10 }}>
-            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#f59e0b18", border: "2px solid #f59e0b40", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 700, color: "#f59e0b", flexShrink: 0 }}>{user.displayName[0]}</div>
-            <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.displayName}</div><div style={{ fontSize: 11, color: "#525265" }}>@{user.username}</div></div>
-            <button onClick={logoutUser} title="로그아웃" style={{ background: "transparent", border: "none", color: "#3a3a52", cursor: "pointer", fontSize: 16, flexShrink: 0 }}>↩</button>
+          <div style={{ padding: "14px 20px", borderBottom: "1px solid #1e1e28", display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 10, background: "#c8a96e15", border: "1.5px solid #c8a96e35", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 15, fontWeight: 700, color: "#c8a96e", flexShrink: 0 }}>{user.displayName[0]}</div>
+            <div style={{ flex: 1, minWidth: 0 }}><div style={{ fontSize: 13, fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "#d8d8e0" }}>{user.displayName}</div><div style={{ fontSize: 10, color: "#52526a", marginTop: 1 }}>@{user.username}</div></div>
+            <button onClick={logoutUser} title="로그아웃" style={{ background: "transparent", border: "none", color: "#38384e", cursor: "pointer", fontSize: 15, flexShrink: 0 }}>↩</button>
           </div>
           <nav style={{ flex: 1, padding: "8px 0", overflowY: "auto" }}>
             {TABS.map(t => (
-              <div key={t.id} className="nav-link" onClick={() => setTab(t.id)} style={{ padding: "10px 18px", display: "flex", alignItems: "center", gap: 10, color: tab === t.id ? "#f59e0b" : "#6a6a82", background: tab === t.id ? "#f59e0b08" : "transparent", borderLeft: `2px solid ${tab === t.id ? "#f59e0b" : "transparent"}`, fontSize: 13, fontWeight: tab === t.id ? 600 : 400 }}>
-                <span style={{ fontSize: 16 }}>{t.icon}</span><span style={{ flex: 1 }}>{t.label}</span>
-                {t.badge > 0 && <span style={{ background: "#f59e0b20", color: "#f59e0b", borderRadius: 10, padding: "1px 7px", fontSize: 11, fontWeight: 600 }}>{t.badge}</span>}
+              <div key={t.id} className="nav-link" onClick={() => setTab(t.id)} style={{ padding: "9px 20px", display: "flex", alignItems: "center", gap: 10, color: tab === t.id ? "#c8a96e" : "#52526a", background: tab === t.id ? "#c8a96e08" : "transparent", borderLeft: `2px solid ${tab === t.id ? "#c8a96e" : "transparent"}`, fontSize: 13, fontWeight: tab === t.id ? 600 : 400, transition: "all .15s" }}>
+                <span style={{ fontSize: 15 }}>{t.icon}</span><span style={{ flex: 1 }}>{t.label}</span>
+                {t.badge > 0 && <span style={{ background: "#c8a96e18", color: "#c8a96e", borderRadius: 8, padding: "1px 7px", fontSize: 10, fontWeight: 600 }}>{t.badge}</span>}
               </div>
             ))}
           </nav>
@@ -472,18 +482,18 @@ export default function App() {
         {/* 메인 콘텐츠 */}
         <main style={{ flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }}>
           <div className="mob-header" style={{ padding: "12px 16px", borderBottom: "1px solid #1a1a26", alignItems: "center", justifyContent: "space-between", background: "#0e0e16", display: "none" }}>
-            <div style={{ fontSize: 20, fontWeight: 700, color: "#f59e0b", letterSpacing: -1 }}>FOCUS</div>
+            <div style={{ fontSize: 20, fontWeight: 700, color: "#c8a96e", letterSpacing: "-1px" }}>FOCUS</div>
             <button onClick={() => setShowSettings(true)} style={{ background: "transparent", border: "1px solid #2a2a38", borderRadius: 8, padding: "6px 12px", color: "#7a7a92", fontSize: 12, cursor: "pointer", position: "relative" }}>
               👤 {user.displayName}
               {pendingCount > 0 && <span style={{ position: "absolute", top: -4, right: -4, background: "#ef4444", color: "white", borderRadius: 10, padding: "0 5px", fontSize: 9, fontWeight: 700 }}>{pendingCount}</span>}
             </button>
           </div>
-          <div style={{ padding: "14px 20px", borderBottom: "1px solid #1a1a26", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
+          <div style={{ padding: "14px 22px", borderBottom: "1px solid #1e1e28", display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
             <div>
               <div style={{ fontSize: 17, fontWeight: 700 }}>{TABS.find(t => t.id === tab)?.icon} {TABS.find(t => t.id === tab)?.label}</div>
               <div style={{ fontSize: 11, color: "#525265", marginTop: 2 }}>{new Date().toLocaleDateString("ko-KR", { year: "numeric", month: "long", day: "numeric", weekday: "short" })}</div>
             </div>
-            <button className="fab" onClick={openAdd} style={{ background: "#f59e0b", border: "none", borderRadius: 10, padding: "9px 18px", color: "#0c0c0f", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ 추가</button>
+            <button className="fab" onClick={openAdd} style={{ background: "#c8a96e", border: "none", borderRadius: 10, padding: "9px 20px", color: "#111114", fontWeight: 700, fontSize: 13, cursor: "pointer", letterSpacing: "-0.01em" }}>+ 추가</button>
           </div>
           {/* 기간 필터 */}
           {tab === "todo" && (
@@ -502,7 +512,7 @@ export default function App() {
               ))}
             </div>
           )}
-          <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px 24px" }}>
+          <div style={{ flex: 1, overflowY: "auto", padding: "16px 22px 28px" }}>
             {pendingCount > 0 && (tab === "todo" || tab === "dontforget") && <FriendRequests requests={user.friendRequests || []} users={users} onAccept={acceptFriend} onReject={rejectFriend} />}
             {tab === "todo"       && (fTodo.length === 0    ? <Empty icon={filter==="overdue"?"🔥":"✨"} msg={filter==="overdue"?"기한 초과된 할 일이 없어요!":"해당 기간에 할 일이 없어요"}/> : fTodo.map(t => <TaskCard key={t.id} task={t} onComplete={completeTask} onDelete={deleteTask} users={users} currentUser={user.username} showDeadline />))}
             {tab === "everyday"   && (fEveryday.length === 0   ? <Empty icon="🔄" msg="매일 반복할 일을 추가해보세요"/>       : fEveryday.map(t => <EverydayCard key={t.id} task={t} onCheck={checkEveryday} onDelete={deleteTask} currentUser={user.username} users={users}/>))}
@@ -514,7 +524,7 @@ export default function App() {
       </div>
 
       {/* 모바일 하단 탭 */}
-      <div className="bot-nav" style={{ borderTop: "1px solid #1a1a26", justifyContent: "space-around", background: "#0e0e16", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", display: "none" }}>
+      <div className="bot-nav" style={{ borderTop: "1px solid #1e1e28", justifyContent: "space-around", background: "#0e0e12", flexShrink: 0, paddingBottom: "env(safe-area-inset-bottom)", display: "none" }}>
         {TABS.map(t => (
           <div key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 2, cursor: "pointer", padding: "8px 0", color: tab===t.id?"#f59e0b":"#525265", position: "relative" }}>
             <span style={{ fontSize: 20 }}>{t.icon}</span>
