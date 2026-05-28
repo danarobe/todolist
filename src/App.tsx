@@ -98,10 +98,10 @@ function TaskCard({ task, onComplete, onDelete, users, currentUser, showDeadline
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 500, color: "#d8d8e0", lineHeight: 1.6, letterSpacing: "-0.01em" }}>{task.title}</div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 7, alignItems: "center" }}>
-          {showDeadline && cat && <span style={{ fontSize: 11, padding: "2px 9px", borderRadius: 6, background: `${CAT_COLOR[cat]}15`, color: CAT_COLOR[cat], fontWeight: 500, letterSpacing: "0.01em" }}>{CAT_LABEL[cat]} · {fmtDate(task.deadline)}</span>}
-          {task.createdAt && <span style={{ fontSize: 11, color: "#7a7a92", fontWeight: 400 }}>등록 {fmtFull(task.createdAt)}</span>}
-          {task.isPrivate && <span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 6, background: "#7c3aed18", color: "#a78bfa" }}>비공개</span>}
-          {creator && task.createdBy !== currentUser && <span style={{ fontSize: 11, color: "#6a6a82", fontWeight: 500 }}>{creator.displayName}</span>}
+          {showDeadline && cat && <span style={{ fontSize: 13, padding: "2px 9px", borderRadius: 6, background: `${CAT_COLOR[cat]}15`, color: CAT_COLOR[cat], fontWeight: 500, letterSpacing: "0.01em" }}>{CAT_LABEL[cat]} · {fmtDate(task.deadline)}</span>}
+          {task.createdAt && <span style={{ fontSize: 13, color: "#7a7a92", fontWeight: 400 }}>등록 {fmtFull(task.createdAt)}</span>}
+          {task.isPrivate && <span style={{ fontSize: 12, padding: "2px 8px", borderRadius: 6, background: "#7c3aed18", color: "#a78bfa" }}>비공개</span>}
+          {creator && task.createdBy !== currentUser && <span style={{ fontSize: 13, color: "#6a6a82", fontWeight: 500 }}>{creator.displayName}</span>}
         </div>
       </div>
       <button className="del-btn" onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#2e2e3e", cursor: "pointer", fontSize: 18, flexShrink: 0, padding: "0 2px", opacity: 0, transition: "opacity .15s" }}>×</button>
@@ -120,8 +120,8 @@ function EverydayCard({ task, onCheck, onDelete, currentUser, users }) {
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 14, fontWeight: 500, color: checked ? "#5a5a72" : "#d8d8e0", letterSpacing: "-0.01em" }}>{task.title}</div>
         <div style={{ display: "flex", gap: 8, marginTop: 6, flexWrap: "wrap" }}>
-          {task.createdAt && <span style={{ fontSize: 11, color: "#7a7a92" }}>등록 {fmtFull(task.createdAt)}</span>}
-          {list.length > 0 && <span style={{ fontSize: 11, color: "#6a6a82" }}>오늘 체크: {list.map(u => users[u]?.displayName || u).join(", ")}</span>}
+          {task.createdAt && <span style={{ fontSize: 13, color: "#7a7a92" }}>등록 {fmtFull(task.createdAt)}</span>}
+          {list.length > 0 && <span style={{ fontSize: 13, color: "#6a6a82" }}>오늘 체크: {list.map(u => users[u]?.displayName || u).join(", ")}</span>}
         </div>
       </div>
       <button onClick={() => onDelete(task.id)} style={{ background: "transparent", border: "none", color: "#2e2e3e", cursor: "pointer", fontSize: 18 }}>×</button>
@@ -135,10 +135,10 @@ function CompletedCard({ task, onRestore, onDelete }) {
     <div className="trow card-base" style={{ padding: "14px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, opacity: 0.75 }}>
       <div style={{ width: 20, height: 20, borderRadius: 6, background: "#c8a96e18", border: "1.5px solid #c8a96e50", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#c8a96e", flexShrink: 0, fontWeight: 700 }}>✓</div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 14, color: "#8a8a9a", fontWeight: 400, letterSpacing: "-0.01em" }}>{task.title}</div>
-        <div style={{ display: "flex", gap: 10, marginTop: 6, flexWrap: "wrap" }}>
-          {task.completedAt && <span style={{ fontSize: 11, color: "#9898aa", fontWeight: 500 }}>완료 {fmtFull(task.completedAt)}</span>}
-          {task.createdAt && <span style={{ fontSize: 11, color: "#7a7a8e" }}>등록 {fmtFull(task.createdAt)}</span>}
+        <div style={{ fontSize: 16, color: "#8a8a9a", fontWeight: 400, letterSpacing: "-0.01em" }}>{task.title}</div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 3, marginTop: 7 }}>
+          {task.createdAt && <span style={{ fontSize: 13, color: "#7a7a8e" }}>등록 {fmtFull(task.createdAt)}</span>}
+          {task.completedAt && <span style={{ fontSize: 13, color: "#9898aa", fontWeight: 500 }}>완료 {fmtFull(task.completedAt)}</span>}
         </div>
       </div>
       <button className="restore-btn" onClick={() => onRestore(task.id)} style={{ background: "transparent", border: "1px solid #2e2e3e", borderRadius: 7, color: "#7a7a92", cursor: "pointer", fontSize: 11, padding: "4px 10px", marginRight: 4, opacity: 0, transition: "opacity .15s", whiteSpace: "nowrap" }}>↩ 복원</button>
