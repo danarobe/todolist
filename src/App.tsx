@@ -292,6 +292,7 @@ export default function App() {
   const [friendMsg, setFriendMsg] = useState("");
   const [showFriends, setShowFriends] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [personFilter, setPersonFilter] = useState("all"); // 작성자 필터
 
   // Fix 1: 자동 로그인 관련 refs
   const autoLoginDone = useRef(false);
@@ -395,9 +396,26 @@ export default function App() {
   const everyday   = vis.filter(t => t.type === "everyday");
   const completed  = vis.filter(t => t.completed);
   const ideas      = vis.filter(t => t.type === "idea");
-  const fTodo = todoTasks.filter(t => { const c = deadlineCat(t.deadline); if (filter === "today") return ["today","overdue"].includes(c); if (filter === "week") return ["today","week","overdue"].includes(c); if (filter === "month") return ["today","week","month","overdue"].includes(c); return true; }).sort((a, b) => a.deadline.localeCompare(b.deadline));
 
+  // 작성자 필터 적용
+  const applyPerson = (arr) => personFilter === "all" ? arr : arr.filter(t => t.createdBy === personFilter);
+
+  const fTodo = applyPerson(todoTasks).filter(t => {
+    const c = deadlineCat(t.deadline);
+    if (filter === "overdue") return c === "overdue";
+    if (filter === "today") return ["today","overdue"].includes(c);
+    if (filter === "week") return ["today","week","overdue"].includes(c);
+    if (filter === "month") return ["today","week","month","overdue"].includes(c);
+    return true;
+  }).sort((a, b) => a.deadline.localeCompare(b.deadline));
+
+  const fEveryday   = applyPerson(everyday);
+  const fDontforget = applyPerson(dontforget);
+  const fCompleted  = applyPerson(completed);
+
+  // 작성자 목록
   const friends = (user.friends || []).map(f => users[f]).filter(Boolean);
+  const allMembers = [{ username: user.username, displayName: "나" }, ...friends];
   const pendingCount = (user.friendRequests || []).length;
   const TABS = [
     { id: "todo", label: "할 일", icon: "📋", badge: todoTasks.length },
@@ -467,17 +485,29 @@ export default function App() {
             </div>
             <button className="fab" onClick={openAdd} style={{ background: "#f59e0b", border: "none", borderRadius: 10, padding: "9px 18px", color: "#0c0c0f", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>+ 추가</button>
           </div>
+          {/* 기간 필터 */}
           {tab === "todo" && (
-            <div style={{ padding: "10px 20px", borderBottom: "1px solid #1a1a26", display: "flex", gap: 6, flexShrink: 0, overflowX: "auto" }}>
-              {[["today","오늘"],["week","이번 주"],["month","이번 달"],["year","올해 전체"]].map(([v,l]) => <button key={v} className="pill-btn" onClick={() => setFilter(v)} style={{ padding: "5px 13px", borderRadius: 20, border: `1px solid ${filter===v?"#f59e0b":"#2a2a38"}`, background: filter===v?"#f59e0b":"transparent", color: filter===v?"#0c0c0f":"#525265", fontWeight: filter===v?600:400, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>{l}</button>)}
+            <div style={{ padding: "8px 20px", borderBottom: "1px solid #1a1a26", display: "flex", gap: 6, flexShrink: 0, overflowX: "auto" }}>
+              {[["overdue","⚠ 기한초과"],["today","오늘"],["week","이번 주"],["month","이번 달"],["year","올해 전체"]].map(([v,l]) => (
+                <button key={v} className="pill-btn" onClick={() => setFilter(v)} style={{ padding: "5px 13px", borderRadius: 20, border: `1px solid ${filter===v?(v==="overdue"?"#ef4444":"#f59e0b"):"#2a2a38"}`, background: filter===v?(v==="overdue"?"#ef4444":"#f59e0b"):"transparent", color: filter===v?"#0c0c0f":"#525265", fontWeight: filter===v?600:400, fontSize: 12, cursor: "pointer", whiteSpace: "nowrap" }}>{l}</button>
+              ))}
+            </div>
+          )}
+          {/* 작성자 필터 - 할 일/매일/잊지말자/완료 탭에서 표시 */}
+          {["todo","everyday","dontforget","completed"].includes(tab) && friends.length > 0 && (
+            <div style={{ padding: "8px 20px", borderBottom: "1px solid #1a1a26", display: "flex", gap: 6, flexShrink: 0, overflowX: "auto", alignItems: "center" }}>
+              <span style={{ fontSize: 11, color: "#525265", flexShrink: 0 }}>작성자:</span>
+              {[{ username: "all", displayName: "전체" }, ...allMembers].map(m => (
+                <button key={m.username} className="pill-btn" onClick={() => setPersonFilter(m.username)} style={{ padding: "4px 12px", borderRadius: 20, border: `1px solid ${personFilter===m.username?"#10b981":"#2a2a38"}`, background: personFilter===m.username?"#10b981":"transparent", color: personFilter===m.username?"#0c0c0f":"#525265", fontWeight: personFilter===m.username?600:400, fontSize: 11, cursor: "pointer", whiteSpace: "nowrap" }}>{m.displayName}</button>
+              ))}
             </div>
           )}
           <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px 24px" }}>
             {pendingCount > 0 && (tab === "todo" || tab === "dontforget") && <FriendRequests requests={user.friendRequests || []} users={users} onAccept={acceptFriend} onReject={rejectFriend} />}
-            {tab === "todo"       && (fTodo.length === 0    ? <Empty icon="✨" msg={filter==="today"?"오늘 할 일이 없어요!":"해당 기간에 할 일이 없어요"}/> : fTodo.map(t => <TaskCard key={t.id} task={t} onComplete={completeTask} onDelete={deleteTask} users={users} currentUser={user.username} showDeadline />))}
-            {tab === "everyday"   && (everyday.length === 0   ? <Empty icon="🔄" msg="매일 반복할 일을 추가해보세요"/>       : everyday.map(t => <EverydayCard key={t.id} task={t} onCheck={checkEveryday} onDelete={deleteTask} currentUser={user.username} users={users}/>))}
-            {tab === "dontforget" && (dontforget.length === 0 ? <Empty icon="⚡" msg="잊으면 안 되는 일이 없어요!"/>          : dontforget.map(t => <TaskCard key={t.id} task={t} onComplete={completeTask} onDelete={deleteTask} users={users} currentUser={user.username}/>))}
-            {tab === "completed"  && (completed.length === 0  ? <Empty icon="📭" msg="완료한 일이 없어요"/>                   : [...completed].sort((a,b)=>(b.completedAt||"").localeCompare(a.completedAt||"")).map(t => <CompletedCard key={t.id} task={t} onRestore={restoreTask} onDelete={deleteTask}/>))}
+            {tab === "todo"       && (fTodo.length === 0    ? <Empty icon={filter==="overdue"?"🔥":"✨"} msg={filter==="overdue"?"기한 초과된 할 일이 없어요!":"해당 기간에 할 일이 없어요"}/> : fTodo.map(t => <TaskCard key={t.id} task={t} onComplete={completeTask} onDelete={deleteTask} users={users} currentUser={user.username} showDeadline />))}
+            {tab === "everyday"   && (fEveryday.length === 0   ? <Empty icon="🔄" msg="매일 반복할 일을 추가해보세요"/>       : fEveryday.map(t => <EverydayCard key={t.id} task={t} onCheck={checkEveryday} onDelete={deleteTask} currentUser={user.username} users={users}/>))}
+            {tab === "dontforget" && (fDontforget.length === 0 ? <Empty icon="⚡" msg="잊으면 안 되는 일이 없어요!"/>          : fDontforget.map(t => <TaskCard key={t.id} task={t} onComplete={completeTask} onDelete={deleteTask} users={users} currentUser={user.username}/>))}
+            {tab === "completed"  && (fCompleted.length === 0  ? <Empty icon="📭" msg="완료한 일이 없어요"/>                   : [...fCompleted].sort((a,b)=>(b.completedAt||"").localeCompare(a.completedAt||"")).map(t => <CompletedCard key={t.id} task={t} onRestore={restoreTask} onDelete={deleteTask}/>))}
             {tab === "ideas"      && (ideas.length === 0      ? <Empty icon="💡" msg="번뜩이는 아이디어를 기록해보세요"/>      : [...ideas].sort((a,b)=>b.createdAt.localeCompare(a.createdAt)).map(t => <IdeaCard key={t.id} task={t} onDelete={deleteTask}/>))}
           </div>
         </main>
