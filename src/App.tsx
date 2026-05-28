@@ -134,11 +134,11 @@ function CompletedCard({ task, onRestore, onDelete }) {
   return (
     <div className="trow card-base" style={{ padding: "14px 16px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, opacity: 0.75 }}>
       <div style={{ width: 20, height: 20, borderRadius: 6, background: "#c8a96e18", border: "1.5px solid #c8a96e50", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, color: "#c8a96e", flexShrink: 0, fontWeight: 700 }}>✓</div>
-      <div style={{ flex: 1 }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
         <div style={{ fontSize: 16, color: "#8a8a9a", fontWeight: 400, letterSpacing: "-0.01em" }}>{task.title}</div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 3, marginTop: 7 }}>
-          {task.createdAt && <span style={{ fontSize: 13, color: "#7a7a8e" }}>등록 {fmtFull(task.createdAt)}</span>}
-          {task.completedAt && <span style={{ fontSize: 13, color: "#9898aa", fontWeight: 500 }}>완료 {fmtFull(task.completedAt)}</span>}
+        <div style={{ display: "flex", flexDirection: "column", gap: 1, marginTop: 8, alignItems: "flex-start" }}>
+          {task.createdAt && <span style={{ fontSize: 13, color: "#7a7a8e", lineHeight: 1.4 }}>등록 {fmtFull(task.createdAt)}</span>}
+          {task.completedAt && <span style={{ fontSize: 13, color: "#9898aa", fontWeight: 500, lineHeight: 1.4 }}>완료 {fmtFull(task.completedAt)}</span>}
         </div>
       </div>
       <button className="restore-btn" onClick={() => onRestore(task.id)} style={{ background: "transparent", border: "1px solid #2e2e3e", borderRadius: 7, color: "#7a7a92", cursor: "pointer", fontSize: 11, padding: "4px 10px", marginRight: 4, opacity: 0, transition: "opacity .15s", whiteSpace: "nowrap" }}>↩ 복원</button>
